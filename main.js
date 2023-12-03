@@ -125,6 +125,7 @@ class SimulatedConsole {
     generateTable(obj, columns = []) {
         const properties = new Set();
         for (const value of Object.values(obj)) {
+            if (!(value instanceof Object)) continue;
             for (const k in value) {
                 if (!~columns.indexOf(k) && columns.length > 0) continue;
                 properties.add(k);
@@ -159,7 +160,7 @@ class SimulatedConsole {
         }
 
         table.appendChild(header);
-
+        console._console.log(properties);
         for (const [key, value] of Object.entries(obj)) {
             const row = document.createElement("tr");
             row.appendChild(
@@ -168,15 +169,20 @@ class SimulatedConsole {
                     textContent: key,
                 })
             );
-            properties.forEach((prop) => {
-                if (prop in value) {
-                    row.appendChild(Object.assign(document.createElement("td"), {
-                        textContent: `${value[prop]}`,
-                    }));
-                } else {
-                    row.appendChild(document.createElement("td"), { textContent: "" });
-                }
-            });
+            if (properties.size > 0) {
+                properties.forEach(prop => {
+                    if (prop in value) {
+                        row.appendChild(Object.assign(document.createElement("td"), {
+                            textContent: `${value[prop]}`,
+                        }));
+                    } else {
+                        row.appendChild(Object.assign(document.createElement("td"), { textContent: "" }));
+                    }
+                });
+            } else {
+                console._console.log(value);
+                row.appendChild(Object.assign(document.createElement("td"), { textContent: value }));
+            }
             table.appendChild(row);
         }
         return table;
