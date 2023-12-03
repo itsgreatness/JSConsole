@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test js code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        ul {
+            padding-inline-start: 2.5rem;
+        }
+
+        body {
+            padding: .5rem;
+        }
+
+        input,
+        output {
+            display: block;
+            border: none;
+            padding: .5rem 0 .5rem 0;
+            outline: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            width: 100%;
+            white-space: pre;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        li {
+            list-style-type: none;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid lightblue;
+            border-collapse: collapse;
+            table-layout: fixed;
+            padding: .5rem;
+        }
+
+        tr:nth-child(2n) {
+            background-color: white;
+        }
+
+        details {
+            cursor: default;
+            user-select: none;
+        }
+
+        .snippet:focus {
+            background-color: lightblue;
+        }
+
+        .error {
+            background-color: palevioletred;
+        }
+
+        .warn {
+            background-color: lightgoldenrodyellow;
+        }
+
+        .log {
+            background-color: whitesmoke;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="history"></div>
+    <hr>
+    <form onsubmit="onSubmit(event)">
+        <input id="codeField" name="code" type="text" autocomplete="off" autocapitalize="off" autofocus>
+    </form>
+    <script src="main.js"></script>
+    <script defer>
+        function onSubmit(event) {
+            event.preventDefault();
+            const code = event.target.code.value;
+            const wrapper = document.getElementById("history");
+            const o = new Run(code);
+            wrapper.append(
+                document.createElement("hr"),
+                Object.assign(document.createElement("input"), {
+                    type: "text",
+                    readOnly: true,
+                    value: o.source,
+                    className: "snippet"
+                }),
+            );
+            if (window.console.isWaiting) {
+                wrapper.append(
+                    document.createElement("hr"),
+                    window.console.output,
+                );
+                window.console.isWaiting = false;
+            }
+            wrapper.append(
+                document.createElement("hr"),
+                Object.assign(document.createElement("output"), {
+                    value: o.output,
+                    className: o.didError ? "error" : "",
+                }),
+            )
+            if (!o.didError) event.target.code.value = "";
+        }
+        function onKeyDown(event) {
+            if (event.key == "Enter" && event.target.classList.contains("snippet")) {
+                event.preventDefault();
+                codeField.value = event.target.value;
+                codeField.focus();
+            }
+        }
+        window.addEventListener("keydown", onKeyDown);
+        const stdout = document.getElementById("history");
+        const codeField = document.getElementById("codeField");
+        window.console = new SimulatedConsole(stdout);
+    </script>
+</body>
+
+</html>
